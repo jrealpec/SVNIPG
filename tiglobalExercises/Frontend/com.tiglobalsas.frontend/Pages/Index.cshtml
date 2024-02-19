@@ -1,0 +1,47 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Carga archivos";
+}
+
+<h1>Archivos cargados</h1>
+
+@if (Model.PhysicalFiles.Count() == 0)
+{
+    <p>
+        No hay archivos cargados actualmente.
+    </p>
+}
+else
+{
+    <table>
+        <thead>
+            <tr>
+                <th></th>
+                <th>
+                    Directorio
+                </th>
+                <th>
+                    Tamaño en (bytes)
+                </th>
+                <th>
+                    <code>PhysicalFileResult</code> desde la carpeta fisica
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var file in Model.PhysicalFiles)
+            {
+                <tr>
+                    <td>
+                        <b>@file.Name</b><br>
+                        @file.PhysicalPath
+                    </td>
+                    <td class="text-center">
+                        @file.Length.ToString("N0")
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

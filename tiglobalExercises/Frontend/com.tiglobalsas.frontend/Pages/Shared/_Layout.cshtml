@@ -1,0 +1,41 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - com.tiglobalsas.frontend</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <ol class="breadcrumb">
+        <li class="active"><i class="fas fa-home fa-fw"></i>@Convert.ToString(string.Format("{0:MMMM dd, yyyy}", DateTime.Now.ToUniversalTime().AddHours(-5))), Ejemplo para cargar archivos</li>
+    </ol>
+    <header>
+        <nav>
+            <div class="container">
+                <ul>
+                   <li><a asp-page="/FileUploadFisico">haga clic para cargar archivo.</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2024 - com.tiglobalsas.frontend - <a asp-area="" asp-page="/Privacy">Privacy</a>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>
