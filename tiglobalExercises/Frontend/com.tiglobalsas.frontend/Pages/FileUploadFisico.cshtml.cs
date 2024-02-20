@@ -11,6 +11,7 @@ using SkiaSharp;
 using System.Buffers.Text;
 using System;
 
+
 namespace com.tiglobalsas.frontend.Pages
 {
     public class FileUploadFisicoModel : PageModel
@@ -23,11 +24,15 @@ namespace com.tiglobalsas.frontend.Pages
         {
             _fileSizeLimit = config.GetValue<long>("FileSizeLimit");
 
-            // To save physical files to a path provided by configuration:
+            // para guardar los archivos se parametrizan en el json configuration.
             _targetFilePath = config.GetValue<string>("StoredFilesPath");
 
-            // To save physical files to the temporary files folder, use:
-            //_targetFilePath = Path.GetTempPath();
+            bool folderExists = Directory.Exists(_targetFilePath);
+            if (!folderExists)
+            {
+                Directory.CreateDirectory(_targetFilePath);
+            }
+
         }
 
         [BindProperty]
@@ -83,6 +88,7 @@ namespace com.tiglobalsas.frontend.Pages
 
             //Funcion que permite leer la pagina 1 la convierto en imagen.
             string filePathImg = @sourcePathFile;
+            string filePathPDF = @sourcePathFile;
             DocumentCore dc = DocumentCore.Load(filePathImg);
             string folderPath = Path.GetFullPath(_targetFilePath);
 
@@ -99,11 +105,14 @@ namespace com.tiglobalsas.frontend.Pages
                 SKBitmap image = page.Rasterize(DPI, SautinSoft.Document.Color.White);
 
                 Directory.CreateDirectory(folderPath);
-                image.Encode(new FileStream(folderPath + @"\" + FileUpload.FormFile.FileName.Split(".")[0] + i.ToString() + ".png", FileMode.Create), SkiaSharp.SKEncodedImageFormat.Png, 100);
+                image.Encode(new FileStream(folderPath + @"\" + FileUpload.FormFile.FileName.Split(".")[0] + i.ToString() + DateTime.Now.ToString("HHmmss") + ".png", FileMode.Create), SkiaSharp.SKEncodedImageFormat.Png, 100);
 
+                break;
 
             }
             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(folderPath) { UseShellExecute = true });
+            //Fin de funcion que convierte a imagen.
+
 
             //Funcion para convertir a Base64 el archivo word.
             string base64 = String.Empty;
@@ -117,6 +126,34 @@ namespace com.tiglobalsas.frontend.Pages
                 await fileStream.WriteAsync(binarydata);
             }
             //Redireccionamos al index para seleccionar otro archivo
+
+            //Funcion que permite leer la pagina 1 y la convierte a pdf
+            using (MemoryStream msInp = new MemoryStream(binarydata))
+            {
+                byte[] outData = null;
+                string outFile = folderPath + @"\" + FileUpload.FormFile.FileName.Split(".")[0] + DateTime.Now.ToString("HHmmss") + ".pdf";
+                // Load a document.
+                DocumentCore dcpdf = DocumentCore.Load(msInp, new DocxLoadOptions());
+                //Calculo las paginas
+                DocumentPaginator dpdf = dcpdf.GetPaginator();
+
+                DocumentPage page = dpdf.Pages[0];
+
+                
+                //Guardo el documento de la primera pagina em formato PDF.
+                using (MemoryStream outMs = new MemoryStream())
+                {
+                    page.Save(outMs, new PdfSaveOptions());
+                    outData = outMs.ToArray();
+                }
+
+                if (outData != null)
+                {
+                    System.IO.File.WriteAllBytes(outFile, outData);
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(outFile) { UseShellExecute = true });
+                }
+            }
+            //Fin funcion que convierte a pdf
 
             return RedirectToPage("Index");
         }

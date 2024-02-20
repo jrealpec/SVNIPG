@@ -11,6 +11,8 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using com.tiglobalsas.frontend.Data;
 using com.tiglobalsas.frontend.Filters;
+using SautinSoft.Document;
+using System.IO;
 
 namespace com.tiglobalsas.frontend
 {
@@ -49,9 +51,16 @@ namespace com.tiglobalsas.frontend
                                 new DisableFormValueModelBindingAttribute());
                         });
             });
+            // To save physical files to a path provided by configuration:
+            var _targetFilePath = Configuration.GetValue<string>("StoredFilesPath");
 
+            bool folderExists = Directory.Exists(_targetFilePath);
+            if (!folderExists)
+            {
+                Directory.CreateDirectory(_targetFilePath);
+            }
             // To list physical files from a path provided by configuration:
-            var physicalProvider = new PhysicalFileProvider(Configuration.GetValue<string>("StoredFilesPath"));
+            var physicalProvider = new PhysicalFileProvider(_targetFilePath);
 
             // To list physical files in the temporary files folder, use:
             //var physicalProvider = new PhysicalFileProvider(Path.GetTempPath());
@@ -59,6 +68,11 @@ namespace com.tiglobalsas.frontend
             services.AddSingleton<IFileProvider>(physicalProvider);
 
             services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase("InMemoryDb"));
+
+            string serial = "03/19/24zy/o2/IjTFkpZBCP3tbIsrlg1KqTyIye55";
+
+            DocumentCore.SetLicense(serial);
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
